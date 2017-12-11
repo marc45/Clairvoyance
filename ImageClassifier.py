@@ -11,11 +11,11 @@ def BuildModel(weightFile, imgW):
     print ('building model')
 
     model = Sequential()
-    model.add(Conv2D(16, (4, 4), strides=2, padding='same', input_shape=(imgW, imgW, 3), activation='relu'))
+    model.add(Conv2D(32, (11, 11), strides=4, padding='same', input_shape=(imgW, imgW, 3), activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Conv2D(16, (4, 4), strides=2, padding='same', activation='relu'))
+    model.add(Conv2D(32, (5, 5), strides=2, padding='same', activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Conv2D(16, (4, 4), strides=2, padding='same', activation='relu'))
+    model.add(Conv2D(32, (3, 3), strides=2, padding='same', activation='relu'))
     model.add(Dropout(0.5))
 
     model.add(Flatten())
@@ -33,56 +33,9 @@ def BuildModel(weightFile, imgW):
     return model
 
 
-
-# def PredictClassifier(weightFile, predictLocation):
-#     imgW = 64
-#     directoryList = []
-#     directoryList.append('images\\leagueset\\sion\\lumberjack')
-#     directoryList.append('images\\leagueset\\sejuani\\poro')
-#     directoryList.append('images\\leagueset\\thresh\\base')
-#     directoryList.append('images\\leagueset\\xayah\celestial')
-#     X = np.zeros((0, imgW, imgW, 3))
-#     Y = np.zeros((0, len(directoryList)))
-
-#     model = BuildModel(weightFile, imgW)
-
-#     rX = model.predict(X)
-
-#     pX = np.argmax(rX, axis=1)
-#     pY = np.argmax(Y, axis=1)
-#     n = 0
-#     for i in range(pY.shape[0]):
-#         if(np.sum(pY[i]) == 0) and (rX[i, pX[i]] < 0.5):
-#             n += 1
-#         elif(pX[i] == pY[i]) and (rX[i, pX[i]] >= 0.5):
-#             n += 1
-#         #else:
-#             #print([i, Y[i,:]])
-
-#     print('training set accuracy: ' +str(n) + '/' + str(Y.shape[0]))
-
-#     files = [f for f in listdir(predictLocation) if f.endswith('.png')]
-#     tX = np.zeros((len(files), imgW, imgW, 3))
-#     for i in range(len(files)):
-#         tX[i] = cv2.resize(cv2.imread(predictLocation + '\\' + files[i]), (imgW, imgW)) / 255.0
-
-#     print('loaded ' + str(tX.shape[0]) + ' test sets')
-
-#     rX = model.predict(tX)
-
-#     np.savetxt('test2.out', rX)
-#     pX = 1 * (np.amax(rX, axis=1) >= 0.5)
-
-#     print('test set accuracy: ' +str(np.sum(pX)) + '/' + str(pX.shape[0]))
-
-#     for i in range(len(files)):
-#         if (pX[i] == 1):
-#             img = cv2.imread('images\\searchresult\\target8\\' + files[i])
-#             cv2.imwrite('images\\result\\search' + str(i) + '.png', img)
-
 def BatchTrainClassifier(batchList, negativeDir, extraTrainingCount, endEpoch):
     # batchList = [[training data folder, weight file name], ...]
-    imgW = 64
+    imgW = 96
     filesPerBatch = int(extraTrainingCount / (len(batchList) - 1))
     
     negX = 0
@@ -95,8 +48,6 @@ def BatchTrainClassifier(batchList, negativeDir, extraTrainingCount, endEpoch):
         negX[i] = cv2.resize(cv2.imread(negativeDir + '\\' + files[i]), (imgW, imgW)) / 255.0
 
     for b in range(len(batchList)):
-        if (b != 2):
-            continue
         # load positive examples for this batch
         files = [f for f in listdir(batchList[b][0]) if f.endswith('.png')]
         X = np.zeros((len(files), imgW, imgW, 3))
